@@ -4,6 +4,7 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flame/palette.dart';
+import 'package:flame/parallax.dart';
 import 'dart:math' as math;
 
 import 'package:flame/sprite.dart';
@@ -13,6 +14,7 @@ import 'package:flame/sprite.dart';
 /// If you press anywhere else, another square will be added.
 class MyGame extends FlameGame with TapCallbacks {
   late SpriteAnimationComponent _dino;
+  late ParallaxComponent _parallaxComponent;
 
   @override
   Future<void> onLoad() async {
@@ -33,6 +35,15 @@ class MyGame extends FlameGame with TapCallbacks {
     _dino.width = 80;
     _dino.height = 80;
     add(_dino);
+
+    _parallaxComponent = await loadParallaxComponent([
+      ParallaxImageData("parallax/plx-1.png"),
+      ParallaxImageData("parallax/plx-2.png"),
+      ParallaxImageData("parallax/plx-3.png"),
+      ParallaxImageData("parallax/plx-4.png"),
+      ParallaxImageData("parallax/plx-5.png"),
+    ]);
+    add(_parallaxComponent);
   }
 
   @override
