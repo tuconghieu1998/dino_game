@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:dino_run/game/dino.dart';
 import 'package:dino_run/game/enemy.dart';
+import 'package:dino_run/game/enemy_manager.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
@@ -19,8 +20,12 @@ class MyGame extends FlameGame with TapCallbacks {
   late Dino _dino;
   late ParallaxComponent _parallaxComponent;
   late ParallaxComponent _groundParallax;
+  late EnemyManager _enemyManager;
 
   static const groundHeight = 60.0;
+
+  final TextComponent _scoreText = TextComponent();
+  int score = 0;
 
   @override
   Future<void> onLoad() async {
@@ -47,12 +52,22 @@ class MyGame extends FlameGame with TapCallbacks {
         Vector2(200, size[1] - _dino.height / 2 - MyGame.groundHeight));
     _dino.yMax = _dino.y;
 
-    var enemy = Enemy(EnemyType.Riho);
+    _enemyManager = EnemyManager();
+
+    score = 0;
+    _scoreText.text = score.toString();
 
     add(_parallaxComponent);
     add(_groundParallax);
     add(_dino);
-    add(enemy);
+    add(_enemyManager);
+    add(_scoreText);
+  }
+
+  @override
+  void onGameResize(Vector2 size) {
+    super.onGameResize(size);
+    _scoreText.position = Vector2(size[0] / 2 - _scoreText.width / 2, 0);
   }
 
   @override
@@ -64,6 +79,19 @@ class MyGame extends FlameGame with TapCallbacks {
       //initDino(touchPoint);
       _dino.jump();
     }
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    score += (60 * dt).toInt();
+    _scoreText.text = score.toString();
+
+    children.whereType<Enemy>().forEach((enemy) {
+      if (_dino.distance(enemy) < 20) {
+        _dino.hit();
+      }
+    });
   }
 
   initDino(point) async {

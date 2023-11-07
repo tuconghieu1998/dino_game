@@ -13,6 +13,9 @@ class Dino extends SpriteAnimationComponent {
   double speedY = 0.0;
   double yMax = 0.0;
 
+  Timer? _timer;
+  bool _isHit = false;
+
   Dino() : super() {
     init();
   }
@@ -34,6 +37,10 @@ class Dino extends SpriteAnimationComponent {
     _hitAnimation =
         spriteSheet.createAnimation(row: 0, stepTime: 0.1, from: 14, to: 16);
     animation = _runAnimation;
+    _isHit = false;
+    _timer = Timer(2, onTick: () {
+      run();
+    });
   }
 
   void setPosition(Vector2 vector) {
@@ -42,11 +49,16 @@ class Dino extends SpriteAnimationComponent {
   }
 
   void run() {
+    _isHit = false;
     animation = _runAnimation;
   }
 
   void hit() {
-    animation = _hitAnimation;
+    if (!_isHit) {
+      animation = _hitAnimation;
+      _timer?.start();
+      _isHit = true;
+    }
   }
 
   void idle() {
@@ -66,6 +78,7 @@ class Dino extends SpriteAnimationComponent {
       y = yMax;
       speedY = 0.0;
     }
+    _timer?.update(dt);
   }
 
   bool isOnGround() {
