@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:dino_run/game/dino.dart';
+import 'package:dino_run/game/enemy.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
@@ -46,9 +47,12 @@ class MyGame extends FlameGame with TapCallbacks {
         Vector2(200, size[1] - _dino.height / 2 - MyGame.groundHeight));
     _dino.yMax = _dino.y;
 
+    var enemy = Enemy(EnemyType.Riho);
+
     add(_parallaxComponent);
     add(_groundParallax);
     add(_dino);
+    add(enemy);
   }
 
   @override
