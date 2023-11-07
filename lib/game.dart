@@ -15,6 +15,7 @@ import 'package:flame/sprite.dart';
 class MyGame extends FlameGame with TapCallbacks {
   late SpriteAnimationComponent _dino;
   late ParallaxComponent _parallaxComponent;
+  late ParallaxComponent _groundParallax;
 
   @override
   Future<void> onLoad() async {
@@ -23,6 +24,23 @@ class MyGame extends FlameGame with TapCallbacks {
     // 11-13: kick
     // 14-16: hit
     // 17-23: sprint
+
+    _parallaxComponent = await loadParallaxComponent([
+      ParallaxImageData("parallax/plx-1.png"),
+      ParallaxImageData("parallax/plx-2.png"),
+      ParallaxImageData("parallax/plx-3.png"),
+      ParallaxImageData("parallax/plx-4.png"),
+      ParallaxImageData("parallax/plx-5.png")
+    ],
+        baseVelocity: Vector2(100, 0),
+        velocityMultiplierDelta: Vector2(1.1, 1.0));
+
+    add(_parallaxComponent);
+    _groundParallax = await loadParallaxComponent([
+      ParallaxImageData("parallax/ground.png"),
+    ], fill: LayerFill.none, baseVelocity: Vector2(100, 0));
+
+    add(_groundParallax);
 
     _dino = SpriteAnimationComponent();
     var image = await images.load("DinoSprites - tard.png");
@@ -35,15 +53,6 @@ class MyGame extends FlameGame with TapCallbacks {
     _dino.width = 80;
     _dino.height = 80;
     add(_dino);
-
-    _parallaxComponent = await loadParallaxComponent([
-      ParallaxImageData("parallax/plx-1.png"),
-      ParallaxImageData("parallax/plx-2.png"),
-      ParallaxImageData("parallax/plx-3.png"),
-      ParallaxImageData("parallax/plx-4.png"),
-      ParallaxImageData("parallax/plx-5.png"),
-    ]);
-    add(_parallaxComponent);
   }
 
   @override
