@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:dino_run/game/dino.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
@@ -8,23 +9,20 @@ import 'package:flame/parallax.dart';
 import 'dart:math' as math;
 
 import 'package:flame/sprite.dart';
+import 'package:flutter/foundation.dart';
 
 /// This example simply adds a rotating white square on the screen.
 /// If you press on a square, it will be removed.
 /// If you press anywhere else, another square will be added.
 class MyGame extends FlameGame with TapCallbacks {
-  late SpriteAnimationComponent _dino;
+  late Dino _dino;
   late ParallaxComponent _parallaxComponent;
   late ParallaxComponent _groundParallax;
 
+  static const groundHeight = 60.0;
+
   @override
   Future<void> onLoad() async {
-    // 0-3: idle
-    // 4-10: run
-    // 11-13: kick
-    // 14-16: hit
-    // 17-23: sprint
-
     _parallaxComponent = await loadParallaxComponent([
       ParallaxImageData("parallax/plx-1.png"),
       ParallaxImageData("parallax/plx-2.png"),
@@ -35,23 +33,21 @@ class MyGame extends FlameGame with TapCallbacks {
         baseVelocity: Vector2(100, 0),
         velocityMultiplierDelta: Vector2(1.1, 1.0));
 
-    add(_parallaxComponent);
     _groundParallax = await loadParallaxComponent([
       ParallaxImageData("parallax/ground.png"),
-    ], fill: LayerFill.none, baseVelocity: Vector2(100, 0));
+    ],
+        fill: LayerFill.none,
+        baseVelocity: Vector2(100, 0),
+        scale: Vector2(1.5, 1.5),
+        position: Vector2(-200, -180));
 
+    _dino = Dino();
+    _dino.setPosition(
+        Vector2(200, size[1] - _dino.height / 2 - MyGame.groundHeight));
+    _dino.yMax = _dino.y;
+
+    add(_parallaxComponent);
     add(_groundParallax);
-
-    _dino = SpriteAnimationComponent();
-    var image = await images.load("DinoSprites - tard.png");
-    final spriteSheet = SpriteSheet(image: image, srcSize: Vector2(24, 24));
-    final idleAnimation =
-        spriteSheet.createAnimation(row: 0, stepTime: 0.1, from: 0, to: 3);
-    final runAnimation =
-        spriteSheet.createAnimation(row: 0, stepTime: 0.1, from: 4, to: 10);
-    _dino.animation = runAnimation;
-    _dino.width = 80;
-    _dino.height = 80;
     add(_dino);
   }
 
@@ -61,7 +57,8 @@ class MyGame extends FlameGame with TapCallbacks {
     if (!event.handled) {
       final touchPoint = event.canvasPosition;
       // add(Square(touchPoint));
-      initDino(touchPoint);
+      //initDino(touchPoint);
+      _dino.jump();
     }
   }
 
