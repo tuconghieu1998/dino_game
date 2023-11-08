@@ -2,6 +2,7 @@ import 'package:dino_run/game/game.dart';
 import 'package:flame/components.dart';
 import 'package:flame/flame.dart';
 import 'package:flame/sprite.dart';
+import 'package:flutter/foundation.dart';
 
 const double GRAVITY = 1000;
 
@@ -12,6 +13,8 @@ class Dino extends SpriteAnimationComponent {
 
   double speedY = 0.0;
   double yMax = 0.0;
+
+  ValueNotifier<int> life = ValueNotifier(5);
 
   Timer? _timer;
   bool _isHit = false;
@@ -38,7 +41,7 @@ class Dino extends SpriteAnimationComponent {
         spriteSheet.createAnimation(row: 0, stepTime: 0.1, from: 14, to: 16);
     animation = _runAnimation;
     _isHit = false;
-    _timer = Timer(2, onTick: () {
+    _timer = Timer(1, onTick: () {
       run();
     });
   }
@@ -58,6 +61,7 @@ class Dino extends SpriteAnimationComponent {
       animation = _hitAnimation;
       _timer?.start();
       _isHit = true;
+      life!.value -= 1;
     }
   }
 
@@ -66,7 +70,7 @@ class Dino extends SpriteAnimationComponent {
   }
 
   void jump() {
-    speedY = -600;
+    speedY = -500;
   }
 
   @override
@@ -83,5 +87,10 @@ class Dino extends SpriteAnimationComponent {
 
   bool isOnGround() {
     return y >= yMax;
+  }
+
+  void reset() {
+    life.value = 5;
+    run();
   }
 }

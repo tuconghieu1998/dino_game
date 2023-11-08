@@ -27,7 +27,6 @@ class EnemyData {
 
 class Enemy extends SpriteAnimationComponent {
   late EnemyData _enemyData;
-  Vector2 sizeScreen = Vector2(0, 0);
   final Random _random = Random();
 
   static final Map<EnemyType, EnemyData> _enemyDetails = {
@@ -71,13 +70,9 @@ class Enemy extends SpriteAnimationComponent {
         row: 0, stepTime: 0.1, from: 0, to: _enemyData.nColumns - 1);
   }
 
-  @override
-  void onGameResize(Vector2 size) {
-    super.onGameResize(size);
-
-    x = size[0] + width;
-    y = size[1] - MyGame.groundHeight - height / 2 - 3;
-    sizeScreen = size;
+  startAtPosition(double startX, double startY) {
+    x = startX;
+    y = startY;
 
     if (_enemyData.canFly && _random.nextBool()) {
       y -= height;
