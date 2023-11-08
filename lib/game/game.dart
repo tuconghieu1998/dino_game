@@ -260,6 +260,20 @@ class MyGame extends FlameGame with TapCallbacks {
       enemy.removeFromParent();
     });
   }
+
+  @override
+  void lifecycleStateChange(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.resumed:
+      case AppLifecycleState.inactive:
+        break;
+      case AppLifecycleState.paused:
+      case AppLifecycleState.detached:
+      case AppLifecycleState.hidden:
+        pauseGame();
+        break;
+    }
+  }
 }
 
 class Square extends RectangleComponent with TapCallbacks {
