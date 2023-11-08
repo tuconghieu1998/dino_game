@@ -1,5 +1,6 @@
 import 'dart:ffi';
 
+import 'package:dino_run/game/audio_manager.dart';
 import 'package:dino_run/widgets/game_over_menu.dart';
 import 'package:dino_run/widgets/hud.dart';
 import 'package:dino_run/widgets/pause_menu.dart';
@@ -30,6 +31,9 @@ class MyGame extends FlameGame with TapCallbacks {
           style: const TextStyle(fontFamily: 'Audiowide', fontSize: 28)));
   int score = 0;
   double _elapsedTime = 0.0;
+
+  bool _isGameOver = false;
+  bool _isGamePaused = false;
 
   @override
   Future<void> onLoad() async {
@@ -86,6 +90,8 @@ class MyGame extends FlameGame with TapCallbacks {
     add(_enemyManager);
     add(_scoreText);
     overlays.add('Hud');
+
+    AudioManager.instance.startBgm('8BitPlatformerLoop.wav');
   }
 
   @override
@@ -101,7 +107,9 @@ class MyGame extends FlameGame with TapCallbacks {
       final touchPoint = event.canvasPosition;
       // add(Square(touchPoint));
       //initDino(touchPoint);
-      _dino.jump();
+      if (!_isGameOver && !_isGamePaused) {
+        _dino.jump();
+      }
     }
   }
 
@@ -128,7 +136,11 @@ class MyGame extends FlameGame with TapCallbacks {
 
   void pauseGame() {
     pauseEngine();
-    overlays.add('PauseMenu');
+    if (!_isGameOver) {
+      _isGamePaused = true;
+      overlays.add('PauseMenu');
+    }
+    AudioManager.instance.pauseBgm();
   }
 
   initDino(point) async {
@@ -141,22 +153,28 @@ class MyGame extends FlameGame with TapCallbacks {
   }
 
   void resumeGame() {
+    _isGamePaused = false;
     overlays.remove("PauseMenu");
     resumeEngine();
+    AudioManager.instance.resumeBgm();
   }
 
   void gameOver() {
+    _isGameOver = true;
     pauseEngine();
     overlays.add('GameOverMenu');
+    AudioManager.instance.pauseBgm();
   }
 
   void reset() {
+    _isGameOver = false;
     score = 0;
     _dino.reset();
     _enemyManager.reset();
     children.whereType<Enemy>().forEach((enemy) {
       enemy.removeFromParent();
     });
+    AudioManager.instance.resumeBgm();
   }
 
   @override
@@ -171,5 +189,11 @@ class MyGame extends FlameGame with TapCallbacks {
         pauseGame();
         break;
     }
+  }
+
+  @override
+  void onDetach() {
+    AudioManager.instance.stopBgm();
+    super.onDetach();
   }
 }

@@ -1,3 +1,4 @@
+import 'package:dino_run/game/audio_manager.dart';
 import 'package:flutter/material.dart';
 
 class Settings extends StatelessWidget {
@@ -35,20 +36,34 @@ class Settings extends StatelessWidget {
           SizedBox(
             height: 30,
           ),
-          SwitchListTile(
-              title: Text(
-                "SFX",
-                style: TextStyle(fontSize: 30, color: Colors.white),
-              ),
-              value: true,
-              onChanged: (value) {}),
-          SwitchListTile(
-              title: Text(
-                "BGM",
-                style: TextStyle(fontSize: 30, color: Colors.white),
-              ),
-              value: true,
-              onChanged: (value) {}),
+          ValueListenableBuilder(
+            valueListenable: AudioManager.instance.listenableSfx,
+            builder: (context, value, child) {
+              return SwitchListTile(
+                  title: Text(
+                    "SFX",
+                    style: TextStyle(fontSize: 30, color: Colors.white),
+                  ),
+                  value: value,
+                  onChanged: (value) {
+                    AudioManager.instance.setSfx(value);
+                  });
+            },
+          ),
+          ValueListenableBuilder(
+            valueListenable: AudioManager.instance.listenableBgm,
+            builder: (context, value, child) {
+              return SwitchListTile(
+                  title: Text(
+                    "BGM",
+                    style: TextStyle(fontSize: 30, color: Colors.white),
+                  ),
+                  value: value,
+                  onChanged: (value) {
+                    AudioManager.instance.setBgm(value);
+                  });
+            },
+          ),
         ],
       ),
     );

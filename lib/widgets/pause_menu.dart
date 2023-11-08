@@ -25,16 +25,27 @@ class PauseMenu extends StatelessWidget {
               SizedBox(
                 height: 10,
               ),
-              IconButton(
-                  padding: EdgeInsets.zero,
-                  iconSize: 64,
-                  onPressed: () {
-                    onResumePressed?.call();
-                  },
-                  icon: Icon(
-                    Icons.play_arrow,
-                    color: Colors.white,
-                  ))
+              ElevatedButton(
+                child: Text(
+                  "Resume",
+                  style: TextStyle(color: Colors.white, fontSize: 18),
+                ),
+                onPressed: () {
+                  onResumePressed?.call();
+                },
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              ElevatedButton(
+                child: Text(
+                  "Main menu",
+                  style: TextStyle(color: Colors.white, fontSize: 18),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
             ],
           ),
         ),
