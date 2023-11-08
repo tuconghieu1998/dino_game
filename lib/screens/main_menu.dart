@@ -1,8 +1,23 @@
 import 'package:dino_run/screens/game_play.dart';
+import 'package:dino_run/widgets/menu.dart';
+import 'package:dino_run/widgets/settings.dart';
 import 'package:flutter/material.dart';
 
-class MainMenu extends StatelessWidget {
+class MainMenu extends StatefulWidget {
   const MainMenu({super.key});
+
+  @override
+  State<MainMenu> createState() => _MainMenuState();
+}
+
+class _MainMenuState extends State<MainMenu> {
+  late ValueNotifier<CrossFadeState> _crossFadeStateNotifier;
+
+  @override
+  void initState() {
+    super.initState();
+    _crossFadeStateNotifier = ValueNotifier(CrossFadeState.showFirst);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,41 +33,33 @@ class MainMenu extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20)),
               color: Colors.black.withOpacity(0.5),
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 100, vertical: 50),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Dino Run",
-                      style: TextStyle(
-                          fontFamily: "Audiowide",
-                          fontSize: 42,
-                          color: Colors.white),
-                    ),
-                    SizedBox(
-                      height: 30,
-                    ),
-                    ElevatedButton(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12.0, vertical: 8),
-                        child: Text(
-                          "Play",
-                          style: TextStyle(fontSize: 18),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 100, vertical: 50),
+                  child: ValueListenableBuilder(
+                    valueListenable: _crossFadeStateNotifier,
+                    builder: (context, value, child) {
+                      return AnimatedCrossFade(
+                        crossFadeState: value,
+                        firstChild: Menu(
+                          onSettingsPressed: showSettings,
                         ),
-                      ),
-                      onPressed: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => GamePlay()));
-                      },
-                    )
-                  ],
-                ),
-              ),
+                        secondChild: Settings(
+                          onMenuPressed: showMenu,
+                        ),
+                        duration: Duration(milliseconds: 300),
+                      );
+                    },
+                  )),
             ),
           )),
     );
+  }
+
+  void showMenu() {
+    _crossFadeStateNotifier.value = CrossFadeState.showFirst;
+  }
+
+  void showSettings() {
+    _crossFadeStateNotifier.value = CrossFadeState.showSecond;
   }
 }

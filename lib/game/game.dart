@@ -29,6 +29,7 @@ class MyGame extends FlameGame with TapCallbacks {
       textRenderer: TextPaint(
           style: const TextStyle(fontFamily: 'Audiowide', fontSize: 28)));
   int score = 0;
+  double _elapsedTime = 0.0;
 
   @override
   Future<void> onLoad() async {
@@ -107,8 +108,12 @@ class MyGame extends FlameGame with TapCallbacks {
   @override
   void update(double dt) {
     super.update(dt);
-    score += (60 * dt).toInt();
-    _scoreText.text = score.toString();
+    _elapsedTime += dt;
+    if (_elapsedTime >= (1 / 60)) {
+      _elapsedTime = 0.0;
+      score += 1;
+      _scoreText.text = score.toString();
+    }
 
     children.whereType<Enemy>().forEach((enemy) {
       if (_dino.distance(enemy) < 30) {
