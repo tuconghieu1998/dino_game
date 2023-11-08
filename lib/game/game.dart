@@ -1,5 +1,8 @@
 import 'dart:ffi';
 
+import 'package:dino_run/widgets/game_over_menu.dart';
+import 'package:dino_run/widgets/hud.dart';
+import 'package:dino_run/widgets/pause_menu.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dino_run/game/dino.dart';
@@ -8,12 +11,8 @@ import 'package:dino_run/game/enemy_manager.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
-import 'package:flame/palette.dart';
 import 'package:flame/parallax.dart';
 import 'dart:math' as math;
-
-import 'package:flame/sprite.dart';
-import 'package:flutter/foundation.dart';
 
 /// This example simply adds a rotating white square on the screen.
 /// If you press on a square, it will be removed.
@@ -61,9 +60,24 @@ class MyGame extends FlameGame with TapCallbacks {
     score = 0;
     _scoreText.text = score.toString();
 
-    overlays.addEntry('Hud', (context, game) => _buildHud());
-    overlays.addEntry('PauseMenu', (context, game) => _buildPauseMenu());
-    overlays.addEntry('GameOverMenu', (context, game) => _buildGameOverMenu());
+    overlays.addEntry(
+        'Hud',
+        (context, game) => Hud(
+              onPausePressed: pauseGame,
+              life: _dino.life,
+            ));
+    overlays.addEntry(
+        'PauseMenu', (context, game) => PauseMenu(onResumePressed: resumeGame));
+    overlays.addEntry(
+        'GameOverMenu',
+        (context, game) => GameOverMenu(
+              score: score,
+              onReplayPressed: () {
+                reset();
+                overlays.remove('GameOverMenu');
+                resumeEngine();
+              },
+            ));
 
     add(_parallaxComponent);
     add(_groundParallax);
@@ -71,45 +85,6 @@ class MyGame extends FlameGame with TapCallbacks {
     add(_enemyManager);
     add(_scoreText);
     overlays.add('Hud');
-  }
-
-  Widget _buildHud() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        GestureDetector(
-            onTap: () {
-              pauseGame();
-            },
-            child: const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Icon(
-                Icons.pause,
-                size: 36,
-                color: Colors.white,
-              ),
-            )),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: ValueListenableBuilder(
-            builder: (BuildContext context, value, child) {
-              List<Widget> list = [];
-              for (int i = 0; i < 5; i++) {
-                list.add(Icon(
-                  (i < value) ? Icons.favorite : Icons.favorite_border,
-                  color: Colors.red,
-                ));
-              }
-
-              return Row(
-                children: list,
-              );
-            },
-            valueListenable: _dino.life,
-          ),
-        )
-      ],
-    );
   }
 
   @override
@@ -151,42 +126,6 @@ class MyGame extends FlameGame with TapCallbacks {
     overlays.add('PauseMenu');
   }
 
-  Widget _buildPauseMenu() {
-    return Center(
-      child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        color: Colors.black.withOpacity(0.5),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 50),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                "Paused",
-                style: TextStyle(
-                    fontFamily: "Audiowide", fontSize: 32, color: Colors.white),
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              IconButton(
-                  padding: EdgeInsets.zero,
-                  iconSize: 64,
-                  onPressed: () {
-                    resumeGame();
-                  },
-                  icon: Icon(
-                    Icons.play_arrow,
-                    color: Colors.white,
-                  ))
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   initDino(point) async {
     final sprite = await Sprite.load('DinoSprites_tard.gif');
     final player = SpriteComponent(scale: Vector2(5, 5), sprite: sprite);
@@ -199,52 +138,6 @@ class MyGame extends FlameGame with TapCallbacks {
   void resumeGame() {
     overlays.remove("PauseMenu");
     resumeEngine();
-  }
-
-  _buildGameOverMenu() {
-    return Center(
-      child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        color: Colors.black.withOpacity(0.5),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 30),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                "Game Over",
-                style: TextStyle(
-                    fontFamily: "Audiowide", fontSize: 32, color: Colors.white),
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Text(
-                "Your score: $score",
-                style: TextStyle(
-                    fontFamily: "Audiowide", fontSize: 22, color: Colors.white),
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              IconButton(
-                  padding: EdgeInsets.zero,
-                  iconSize: 64,
-                  onPressed: () {
-                    reset();
-                    overlays.remove('GameOverMenu');
-                    resumeEngine();
-                  },
-                  icon: Icon(
-                    Icons.replay,
-                    color: Colors.white,
-                  ))
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   void gameOver() {
@@ -273,53 +166,5 @@ class MyGame extends FlameGame with TapCallbacks {
         pauseGame();
         break;
     }
-  }
-}
-
-class Square extends RectangleComponent with TapCallbacks {
-  static const speed = 3;
-  static const squareSize = 128.0;
-  static const indicatorSize = 6.0;
-
-  static final Paint red = BasicPalette.red.paint();
-  static final Paint blue = BasicPalette.blue.paint();
-
-  Square(Vector2 position)
-      : super(
-          position: position,
-          size: Vector2.all(squareSize),
-          anchor: Anchor.center,
-        );
-
-  @override
-  void update(double dt) {
-    super.update(dt);
-    angle += speed * dt;
-    angle %= 2 * math.pi;
-  }
-
-  @override
-  Future<void> onLoad() async {
-    super.onLoad();
-    add(
-      RectangleComponent(
-        size: Vector2.all(indicatorSize),
-        paint: blue,
-      ),
-    );
-    add(
-      RectangleComponent(
-        position: size / 2,
-        size: Vector2.all(indicatorSize),
-        anchor: Anchor.center,
-        paint: red,
-      ),
-    );
-  }
-
-  @override
-  void onTapDown(TapDownEvent event) {
-    removeFromParent();
-    event.handled = true;
   }
 }
